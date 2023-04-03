@@ -1,0 +1,43 @@
+{
+  "devDependencies": {
+    "@types/axios": "^0.14.0",
+    "@types/node": "^18.15.11",
+    "@types/redis": "^4.0.11",
+    "@types/ws": "^8.5.3",
+    "nodemon": "^2.0.20",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.9.4"
+  },
+  "dependencies": {
+    "@fawkes.js/api-types": "^3.0.0",
+    "@fawkes.js/rest": "^3.0.1",
+    "@types/amqplib": "^0.10.1",
+    "amqplib": "^0.10.3",
+    "axios": "^1.2.1",
+    "dotenv": "^16.0.3",
+    "erlpack": "^0.1.4",
+    "redis": "^4.5.1",
+    "ws": "^8.11.0"
+  },
+  "name": "@fawkes.js/gateway",
+  "version": "3.0.1",
+  "main": "./dist/esm/index.js",
+  "module": "./dist/index.mjs",
+  "types": "dist/types/index.d.ts",
+  "exports": {
+    "import": "./dist/esm/index.js",
+    "require": "./dist/cjs/index.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start:dev": "nodemon src/index.ts",
+    "build": "tsc --project tsconfig.esm.json & tsc --project tsconfig.cjs.json",
+    "start": "node dist/cjs/index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "files": [
+    "dist"
+  ]
+}
