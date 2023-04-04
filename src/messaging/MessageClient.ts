@@ -54,7 +54,6 @@ export class MessageClient extends BaseClass {
   async publishSecondary (message: any): Promise<void> {
     if (message.d.type === 3) {
       const queue = await this.client.cache.get('event:message:' + String(message.d.message.id))
-      console.log(queue)
 
       const data = { tag: 'event:message' + String(message.d.message.id), data: message }
       this.channel.sendToQueue(queue, Buffer.from(JSON.stringify(data)))
