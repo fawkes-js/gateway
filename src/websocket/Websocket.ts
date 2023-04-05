@@ -14,9 +14,5 @@ export function unpack (data: Buffer): GatewayPayload {
 export function createWebSocket (gateway: string, query: any = {}): WebSocket {
   query.encoding = 'etf'
   query = new URLSearchParams(query)
-  console.log('the query:', query)
-  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-  console.log(`Websocket: ${gateway}?${query}`)
-  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
   return new WebSocket(`${gateway}?${query}`)
 }

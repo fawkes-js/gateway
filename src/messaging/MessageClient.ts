@@ -34,7 +34,7 @@ export class MessageClient extends BaseClass {
       // Create the exchange if it does not exist, and then bind a temporary channel to it,
       this.channel.assertExchange('secondary', 'fanout', { durable: false })
 
-      this.channel.assertQueue('', { exclusive: true }, (err, q) => {
+      this.channel.assertQueue('', { exclusive: true }, (err:any, q:any) => {
         // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
         if (err) {
           console.log('AMQP ERROR - Error asserting queue')
