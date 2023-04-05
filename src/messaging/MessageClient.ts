@@ -34,7 +34,7 @@ export class MessageClient extends BaseClass {
       // Create the exchange if it does not exist, and then bind a temporary channel to it,
       this.channel.assertExchange('secondary', 'fanout', { durable: false })
 
-      this.channel.assertQueue('', { exclusive: true }, (err, q) => {
+      this.channel.assertQueue('', { exclusive: true }, (err:any, q:any) => {
         // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
         if (err) {
           console.log('AMQP ERROR - Error asserting queue')
@@ -54,7 +54,6 @@ export class MessageClient extends BaseClass {
   async publishSecondary (message: any): Promise<void> {
     if (message.d.type === 3) {
       const queue = await this.client.cache.get('event:message:' + String(message.d.message.id))
-      console.log(queue)
 
       const data = { tag: 'event:message' + String(message.d.message.id), data: message }
       this.channel.sendToQueue(queue, Buffer.from(JSON.stringify(data)))
