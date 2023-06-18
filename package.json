@@ -18,8 +18,8 @@
     "typescript": "^5.0.3"
   },
   "dependencies": {
-    "@fawkes.js/api-types": "^3.0.0",
-    "@fawkes.js/rest": "^3.0.1",
+    "@fawkes.js/api-types": "^6.0.0",
+    "@fawkes.js/rest": "^6.0.0",
     "amqplib": "^0.10.3",
     "axios": "^1.2.1",
     "dotenv": "^16.0.3",
@@ -28,7 +28,7 @@
     "ws": "^8.11.0"
   },
   "name": "@fawkes.js/gateway",
-  "version": "3.0.1",
+  "version": "6.0.0",
   "main": "./dist/esm/index.js",
   "module": "./dist/index.mjs",
   "types": "dist/types/index.d.ts",

@@ -1,19 +1,30 @@
 import { REST, type RESTOptions } from '@fawkes.js/rest';
 import { MessageClient } from './messaging/MessageClient';
-import { mergeOptions } from './utils/Options';
+import {
+  defaultGatewayOptions,
+  defaultRESTOptions,
+  mergeOptions,
+} from './utils/Options';
 import { ShardManager } from './websocket/ShardManager';
 import { type RabbitOptions, type REDISOptions } from '@fawkes.js/api-types';
 import { RedisClient } from './messaging/RedisClient';
 
+type RESTGatewayOptions = {
+  api?: string;
+  version?: string;
+  tokenType?: string;
+};
+
+type WebsocketOptions = {
+  version: number;
+};
 export interface GatewayOptions {
   intents: any[];
   token: string;
   redis: REDISOptions;
   rabbit: RabbitOptions;
-  rest: RESTOptions;
-  ws?: {
-    version: number;
-  };
+  rest?: RESTGatewayOptions;
+  ws?: WebsocketOptions;
   shards: number;
 }
 
@@ -27,11 +38,35 @@ export class Gateway {
   messageClient: MessageClient;
 
   constructor(options: GatewayOptions) {
-    this.options = options;
+    this.options = mergeOptions([
+      defaultGatewayOptions,
+      {
+        rest: mergeOptions([
+          defaultRESTOptions,
+          { redis: options.redis },
+          options.rest ? options.rest : {},
+          { discord: { token: options.token } },
+        ]),
+      },
+      { intents: options.intents },
+      { redis: options.redis },
+      { rabbit: options.rabbit },
+      { rest: options.rest },
+      { ws: options.ws },
+      { shards: options.shards },
+      { discord: { token: options.token } },
+    ]);
 
     this.token = options.token;
 
-    this.rest = new REST(options.rest);
+    this.rest = new REST(
+      mergeOptions([
+        defaultRESTOptions,
+        { redis: options.redis },
+        options.rest ? options.rest : {},
+        { discord: { token: options.token } },
+      ])
+    );
     // mergeOptions([
     //   this.options.rest,
     //   { redis: this.options.redis },
