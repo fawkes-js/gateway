@@ -1,56 +1,56 @@
-import { BaseClass } from '../BaseClass'
-import { createClient, type RedisClientType } from 'redis'
-import { type Gateway } from '../Gateway'
-import { type DiscordAPIGuild, type REDISOptions } from '@fawkes.js/api-types'
+import { BaseClass } from "../BaseClass";
+import { createClient, type RedisClientType } from "redis";
+import { type Gateway } from "../Gateway";
+import { type DiscordAPIGuild, type REDISOptions } from "@fawkes.js/api-types";
 
 export class RedisClient extends BaseClass {
-  client: Gateway
-  options: REDISOptions
-  cache!: RedisClientType
-  constructor (client: Gateway) {
-    super()
+  client: Gateway;
+  options: REDISOptions;
+  cache!: RedisClientType;
+  constructor(client: Gateway) {
+    super();
 
-    this.options = client.options.redis
+    this.options = client.options.redis;
 
-    this.client = client
+    this.client = client;
 
-    Object.defineProperty(this, 'cache', { value: null, writable: true })
-    Object.defineProperty(this, 'subscriber', { value: null, writable: true })
+    Object.defineProperty(this, "cache", { value: null, writable: true });
+    Object.defineProperty(this, "subscriber", { value: null, writable: true });
   }
 
-  async connect (): Promise<void> {
+  async connect(): Promise<void> {
     // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
     const url = this.options.url
       ? this.options.url
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-      : `redis://${this.options.username}:${this.options.password}@${this.options.hostname}:${this.options.port}`
+      : // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+        `redis://${this.options.username}:${this.options.password}@${this.options.hostname}:${this.options.port}`;
 
-    this.cache = createClient({ url })
+    this.cache = createClient({ url });
 
-    await this.cache.connect()
+    await this.cache.connect();
   }
 
-  async get (id: string): Promise<any> {
-    return JSON.parse(await this.cache.get(id) as string)
+  async get(id: string): Promise<any> {
+    return JSON.parse((await this.cache.get(id)) as string);
   }
 
-  async set (id: string, data: any): Promise<any> {
-    return await this.cache.set(id, JSON.stringify(data))
+  async set(id: string, data: any): Promise<any> {
+    return await this.cache.set(id, JSON.stringify(data));
   }
 
-  async delete (id: string): Promise<any> {
-    const key = `guild:${id}`
-    return await this.cache.del(key)
+  async delete(id: string): Promise<any> {
+    const key = `guild:${id}`;
+    return await this.cache.del(key);
   }
 
-  async has (id: string): Promise<any> {
-    const key = `guild:${id}`
-    return await this.cache.get(key)
+  async has(id: string): Promise<any> {
+    const key = `guild:${id}`;
+    return await this.cache.get(key);
   }
 
-  async patch (id: string, data: DiscordAPIGuild): Promise<any> {
-    const key = `guild:${id}`
+  async patch(id: string, data: DiscordAPIGuild): Promise<any> {
+    const key = `guild:${id}`;
 
-    return await this.cache.set(key, JSON.stringify(data))
+    return await this.cache.set(key, JSON.stringify(data));
   }
 }

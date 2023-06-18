@@ -1,34 +1,42 @@
-import { type RESTOptions } from '@fawkes.js/rest';
+export function mergeOptions(options: object[]): any {
+  function nested(objectA: any, objectB: any): any {
+    Object.keys(objectB).forEach((key) => {
+      if (Object.keys(objectA).includes(key)) {
+        if (typeof objectB[key] === "object") {
+          nested(objectA[key], objectB[key]);
+        } else {
+          if (objectB[key]) objectA[key] = objectB[key];
+        }
+      } else {
+        if (objectB[key]) objectA[key] = objectB[key];
+      }
+    });
 
-export function mergeOptions(options: object[]): object {
+    return objectA;
+  }
+
   let value = {};
 
-  options.map((option) => {
-    value = { ...value, ...option };
-    return value;
+  options.forEach((option) => {
+    if (!option) return;
+    value = nested(value, option);
   });
+
   return value;
 }
 
-export interface DefaultClientOptions {
-  rest: RESTOptions;
-  intents: any[];
+export const defaultRESTOptions = {
+  discord: {
+    prefix: "Bot",
+    api: "https://discord.com/api",
+    versioned: true,
+    version: "10",
+  },
+};
+
+export const defaultGatewayOptions = {
   ws: {
-    version: number;
-  };
-  shards: number | 'auto';
-}
-// export const defaultRESTOptions: RESTOptions = {
-//   prefix: 'Bot',
-//   api: 'https://discord.com/api',
-//   version: '10',
-//   versioned: true
-// }
-// export const defaultClientOptions: DefaultClientOptions = {
-//   rest: defaultRESTOptions,
-//   intents: [],
-//   ws: {
-//     version: 10
-//   },
-//   shards: 'auto'
-// }
+    version: "10",
+  },
+  shards: "auto",
+};
