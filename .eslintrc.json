@@ -1,9 +1,10 @@
 {
+  "root": true,
   "env": {
     "browser": true,
     "es2021": true
   },
-  "extends": ["standard-with-typescript"],
+  "extends": ["standard-with-typescript", "prettier"],
   "overrides": [],
   "parserOptions": {
     "ecmaVersion": "latest",
@@ -11,7 +12,8 @@
     "project": ["./tsconfig.esm.json"]
   },
   "rules": {
-    "semi": 2,
-    "no-extra-semi": "off"
-  }
+    "@typescript-eslint/semi": [2, "always"],
+    "@typescript-eslint/strict-boolean-expressions": "off"
+  },
+  "ignorePatterns": ["node_modules", "dist/**", ".vscode/**", ".github/**"]
 }

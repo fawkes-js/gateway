@@ -1,10 +1,10 @@
-import { GatewayCloseEventCodes, GatewayOpcodes } from '@fawkes.js/api-types';
-import { createWebSocket, pack, unpack } from './Websocket';
-import { type WebSocket, type CloseEvent, type MessageEvent } from 'ws';
-import { type Gateway } from '../Gateway';
-import { BaseClass } from '../BaseClass';
-import { type ShardManager } from './ShardManager';
-import { FawkesError } from '../errors/FawkesError';
+import { GatewayCloseEventCodes, GatewayOpcodes } from "@fawkes.js/api-types";
+import { createWebSocket, pack, unpack } from "./Websocket";
+import { type WebSocket, type CloseEvent, type MessageEvent } from "ws";
+import { type Gateway } from "../Gateway";
+import { BaseClass } from "../BaseClass";
+import { type ShardManager } from "./ShardManager";
+import { FawkesError } from "../errors/FawkesError";
 export interface GatewayPayload {
   op: number;
   d?: any;
@@ -36,7 +36,7 @@ export class Shard extends BaseClass {
   ratelimit: RateLimitData;
   manager: ShardManager;
   id: number;
-  state!: null | 'CONNECTING' | 'OPEN' | 'CLOSING' | 'CLOSED';
+  state!: null | "CONNECTING" | "OPEN" | "CLOSING" | "CLOSED";
   constructor(id: number, manager: ShardManager, client: Gateway) {
     super();
 
@@ -48,20 +48,20 @@ export class Shard extends BaseClass {
 
     this.gateway = manager.gateway;
 
-    Object.defineProperty(this, 'ws', { value: null, writable: true });
+    Object.defineProperty(this, "ws", { value: null, writable: true });
 
-    Object.defineProperty(this, 'sessionId', { value: null, writable: true });
+    Object.defineProperty(this, "sessionId", { value: null, writable: true });
 
     this.lastHeartbeatAcknowledged = true;
 
     this.sequence = null;
 
-    Object.defineProperty(this, 'heartbeatInterval', {
+    Object.defineProperty(this, "heartbeatInterval", {
       value: null,
       writable: true,
     });
 
-    Object.defineProperty(this, 'state', { value: null, writable: true });
+    Object.defineProperty(this, "state", { value: null, writable: true });
 
     this.ratelimit = {
       queue: [],
@@ -76,23 +76,23 @@ export class Shard extends BaseClass {
     switch (event.code) {
       case GatewayCloseEventCodes.UnknownError:
         this.debug({
-          title: 'Gateway Close',
-          value: 'Unknown Error Close Code',
+          title: "Gateway Close",
+          value: "Unknown Error Close Code",
         });
         break;
 
       case GatewayCloseEventCodes.UnknownOpcode:
         this.debug({
-          title: 'Gateway Close',
-          value: 'Unknown Opcode Close Code',
+          title: "Gateway Close",
+          value: "Unknown Opcode Close Code",
         });
         this.resume();
         break;
 
       case GatewayCloseEventCodes.DecodeError:
         this.debug({
-          title: 'Gateway Close',
-          value: 'Unknown Error Close Code',
+          title: "Gateway Close",
+          value: "Unknown Error Close Code",
         });
         this.resume();
         break;
@@ -100,82 +100,82 @@ export class Shard extends BaseClass {
       case GatewayCloseEventCodes.NotAuthenticated:
         this.resume();
         this.debug({
-          title: 'Gateway Close',
-          value: 'Not Authenticated Close Code',
+          title: "Gateway Close",
+          value: "Not Authenticated Close Code",
         });
         break;
 
       case GatewayCloseEventCodes.AuthenticationFailed:
         this.debug({
-          title: 'Gateway Close',
-          value: 'Authentication Failed Close Code',
+          title: "Gateway Close",
+          value: "Authentication Failed Close Code",
         });
         throw new FawkesError(
-          'Authentication Failed',
-          'An invalid token was provided.'
+          "Authentication Failed",
+          "An invalid token was provided."
         );
 
       case GatewayCloseEventCodes.AlreadyAuthenticated:
         this.debug({
-          title: 'Gateway Close',
-          value: 'Already Authenticated Close Code',
+          title: "Gateway Close",
+          value: "Already Authenticated Close Code",
         });
         break;
 
       case GatewayCloseEventCodes.InvalidSequence:
         this.debug({
-          title: 'Gateway Close',
-          value: 'Invalid Sequence Close Code',
+          title: "Gateway Close",
+          value: "Invalid Sequence Close Code",
         });
         break;
 
       case GatewayCloseEventCodes.RateLimited:
         this.debug({
-          title: 'Gateway Close',
-          value: 'Rate Limited Close Code',
+          title: "Gateway Close",
+          value: "Rate Limited Close Code",
         });
         this.resume();
         break;
 
       case GatewayCloseEventCodes.SessionTimedOut:
         this.debug({
-          title: 'Gateway Close',
-          value: 'Session Timed Out Close Code',
+          title: "Gateway Close",
+          value: "Session Timed Out Close Code",
         });
         break;
 
       case GatewayCloseEventCodes.InvalidShard:
         this.debug({
-          title: 'Gateway Close',
-          value: 'Invalid Shard Close Code',
+          title: "Gateway Close",
+          value: "Invalid Shard Close Code",
         });
         break;
 
       case GatewayCloseEventCodes.ShardingRequired:
         this.debug({
-          title: 'Gateway Close',
-          value: 'Sharding Required Close Code',
+          title: "Gateway Close",
+          value: "Sharding Required Close Code",
         });
         break;
 
       case GatewayCloseEventCodes.InvalidAPIVersion:
         this.debug({
-          title: 'Gateway Close',
-          value: 'Invalid API Version Close Code',
+          title: "Gateway Close",
+          value: "Invalid API Version Close Code",
         });
         break;
 
       case GatewayCloseEventCodes.InvalidIntents:
         this.debug({
-          title: 'Gateway Close',
-          value: 'Invalid Intents Close Code',
+          title: "Gateway Close",
+          value: "Invalid Intents Close Code",
         });
         break;
 
       case GatewayCloseEventCodes.DisallowedIntents:
         this.debug({
-          title: 'Gateway Close',
-          value: 'Disallowed Intents Close Code',
+          title: "Gateway Close",
+          value: "Disallowed Intents Close Code",
         });
         break;
     }
@@ -209,13 +209,13 @@ export class Shard extends BaseClass {
   }
 
   send(data: WebSocketPayload): void {
-    this.ratelimit.queue[data.important ? 'unshift' : 'push'](data);
+    this.ratelimit.queue[data.important ? "unshift" : "push"](data);
     this.processQueue();
   }
 
   resume(d?: any | null): void {
-    if (d.d === false) this.sessionId = '';
-    this.emit('ShardReconnect', this);
+    if (d.d === false) this.sessionId = "";
+    this.emit("ShardReconnect", this);
   }
 
   sendHeartbeat(): void {
@@ -243,12 +243,13 @@ export class Shard extends BaseClass {
   onMessage(data: MessageEvent): void {
     const message: GatewayPayload = unpack(data.data as unknown as Buffer);
     if (message.s !== null && this.sequence !== null) {
-      if ((message.s as number) > this.sequence)
+      if ((message.s as number) > this.sequence) {
         this.sequence = message.s as number;
+      }
     }
     if (message.t !== null) {
       if (
-        message.t === 'INTERACTION_CREATE' &&
+        message.t === "INTERACTION_CREATE" &&
         (message.d.type === 3 || message.d.type === 4 || message.d.type === 5)
       ) {
         void this.client.messageClient.publishSecondary(message);
@@ -258,8 +259,8 @@ export class Shard extends BaseClass {
     }
 
     switch (message.t) {
-      case 'READY':
-        this.debug({ title: 'Gateway', value: 'Ready Event Received,' });
+      case "READY":
+        this.debug({ title: "Gateway", value: "Ready Event Received," });
 
         if (this.sessionId === null) this.sessionId = message.d.session_id;
         break;
@@ -267,27 +268,27 @@ export class Shard extends BaseClass {
 
     switch (message.op) {
       case GatewayOpcodes.Dispatch:
-        this.debug({ title: 'Gateway', value: 'Dispatch Event Received,' });
+        this.debug({ title: "Gateway", value: "Dispatch Event Received," });
         break;
 
       case GatewayOpcodes.Heartbeat:
-        this.debug({ title: 'Gateway', value: 'Heartbeat Event Received,' });
+        this.debug({ title: "Gateway", value: "Heartbeat Event Received," });
         break;
 
       case GatewayOpcodes.Reconnnect:
-        this.debug({ title: 'Gateway', value: 'Reconnect Event Received,' });
+        this.debug({ title: "Gateway", value: "Reconnect Event Received," });
         break;
 
       case GatewayOpcodes.InvalidSession:
         this.debug({
-          title: 'Gateway',
-          value: 'Invalid Session Event Received,',
+          title: "Gateway",
+          value: "Invalid Session Event Received,",
         });
         this.resume(message.d);
         break;
 
       case GatewayOpcodes.Hello:
-        this.debug({ title: 'Gateway', value: 'Hello Event Received,' });
+        this.debug({ title: "Gateway", value: "Hello Event Received," });
         this.sendHeartbeat();
         this.startHeartbeats(message.d.heartbeat_interval);
         this.identify();
@@ -295,7 +296,7 @@ export class Shard extends BaseClass {
 
       case GatewayOpcodes.HeartbeatACK:
         this.debug({
-          title: 'Gateway',
+          title: "Gateway",
           value: `SHARD ${this.id} - Heartbeat Acknowledgement Event Received,`,
         });
         this.acknowledgedHeartbeat();
@@ -318,9 +319,9 @@ export class Shard extends BaseClass {
           token: this.client.token,
           intents,
           properties: {
-            os: 'linux',
-            browser: 'fawkes.js',
-            device: 'fawkes.js',
+            os: "linux",
+            browser: "fawkes.js",
+            device: "fawkes.js",
             version: this.client.options.ws.version,
           },
           compression: false,
