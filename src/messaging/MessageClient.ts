@@ -48,18 +48,14 @@ export class MessageClient extends BaseClass {
         // Create the exchange if it does not exist, and then bind a temporary channel to it,
         this.channel.assertExchange("secondary", "fanout", { durable: false });
 
-        this.channel.assertQueue(
-          "",
-          { exclusive: true },
-          (err: any, q: any) => {
-            if (err) {
-              console.log("AMQP ERROR - Error asserting queue");
-              return;
-            }
-
-            this.channel.bindQueue(q.queue, "secondary", "");
+        this.channel.assertQueue("", { exclusive: true }, (err: any, q: any) => {
+          if (err) {
+            console.log("AMQP ERROR - Error asserting queue");
+            return;
           }
-        );
+
+          this.channel.bindQueue(q.queue, "secondary", "");
+        });
       });
     });
   }
@@ -70,9 +66,7 @@ export class MessageClient extends BaseClass {
 
   async publishSecondary(message: any): Promise<void> {
     if (message.d.type === 3) {
-      const queue = await this.client.cache.get(
-        "event:message:" + String(message.d.message.id)
-      );
+      const queue = await this.client.cache.get("event:message:" + String(message.d.message.id));
 
       const data = {
         tag: "event:message" + String(message.d.message.id),

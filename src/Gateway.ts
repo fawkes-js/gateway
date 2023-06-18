@@ -1,10 +1,6 @@
 import { REST } from "@fawkes.js/rest";
 import { MessageClient } from "./messaging/MessageClient";
-import {
-  defaultGatewayOptions,
-  defaultRESTOptions,
-  mergeOptions,
-} from "./utils/Options";
+import { defaultGatewayOptions, defaultRESTOptions, mergeOptions } from "./utils/Options";
 import { ShardManager } from "./websocket/ShardManager";
 import { type RabbitOptions, type REDISOptions } from "@fawkes.js/api-types";
 import { RedisClient } from "./messaging/RedisClient";

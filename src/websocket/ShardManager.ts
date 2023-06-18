@@ -53,11 +53,7 @@ export class ShardManager extends BaseClass {
     this.max_concurrency = data.session_start_limit.max_concurrency;
     this.shardQueue.total = data.session_start_limit.max_concurrency;
 
-    if (
-      this.client.totalShards === null ||
-      this.client.totalShards === undefined ||
-      typeof this.client.totalShards !== "number"
-    )
+    if (this.client.totalShards === null || this.client.totalShards === undefined || typeof this.client.totalShards !== "number")
       this.client.totalShards = data.shards;
 
     for (let id = 0; id < this.client.totalShards; id++) {

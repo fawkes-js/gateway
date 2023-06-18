@@ -110,10 +110,7 @@ export class Shard extends BaseClass {
           title: "Gateway Close",
           value: "Authentication Failed Close Code",
         });
-        throw new FawkesError(
-          "Authentication Failed",
-          "An invalid token was provided."
-        );
+        throw new FawkesError("Authentication Failed", "An invalid token was provided.");
 
       case GatewayCloseEventCodes.AlreadyAuthenticated:
         this.debug({
@@ -196,8 +193,7 @@ export class Shard extends BaseClass {
     }
 
     while (
-      (this.ratelimit.remaining > 5 ||
-        (this.ratelimit.queue[0]?.important && this.ratelimit.remaining > 0)) &&
+      (this.ratelimit.remaining > 5 || (this.ratelimit.queue[0]?.important && this.ratelimit.remaining > 0)) &&
       this.ratelimit.queue.length > 0
     ) {
       const item = this.ratelimit.queue.shift();
@@ -248,10 +244,7 @@ export class Shard extends BaseClass {
       }
     }
     if (message.t !== null) {
-      if (
-        message.t === "INTERACTION_CREATE" &&
-        (message.d.type === 3 || message.d.type === 4 || message.d.type === 5)
-      ) {
+      if (message.t === "INTERACTION_CREATE" && (message.d.type === 3 || message.d.type === 4 || message.d.type === 5)) {
         void this.client.messageClient.publishSecondary(message);
       } else {
         this.client.messageClient.publishPrimary(message);
