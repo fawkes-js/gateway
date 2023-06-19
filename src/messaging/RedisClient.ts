@@ -1,7 +1,7 @@
 import { BaseClass } from "../BaseClass";
 import { createClient, type RedisClientType } from "redis";
 import { type Gateway } from "../Gateway";
-import { type DiscordAPIGuild, type REDISOptions } from "@fawkes.js/api-types";
+import { type DiscordAPIGuild, type REDISOptions } from "@fawkes.js/typings";
 
 export class RedisClient extends BaseClass {
   client: Gateway;
@@ -31,7 +31,7 @@ export class RedisClient extends BaseClass {
   }
 
   async get(id: string): Promise<any> {
-    return JSON.parse((await this.cache.get(id)) as string);
+    return JSON.parse(<string>await this.cache.get(id));
   }
 
   async set(id: string, data: any): Promise<any> {
