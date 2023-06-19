@@ -14,5 +14,5 @@ export function unpack(data: Buffer): GatewayPayload {
 export function createWebSocket(gateway: string, query: any = {}): WebSocket {
   query.encoding = "etf";
   query = new URLSearchParams(query);
-  return new WebSocket(`${gateway}?${query as string}`);
+  return new WebSocket(`${gateway}?${<string>query}`);
 }

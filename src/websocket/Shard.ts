@@ -1,4 +1,4 @@
-import { GatewayCloseEventCodes, GatewayOpcodes } from "@fawkes.js/api-types";
+import { GatewayCloseEventCodes, GatewayOpcodes } from "@fawkes.js/typings";
 import { createWebSocket, pack, unpack } from "./Websocket";
 import { type WebSocket, type CloseEvent, type MessageEvent } from "ws";
 import { type Gateway } from "../Gateway";
@@ -237,10 +237,10 @@ export class Shard extends BaseClass {
   }
 
   onMessage(data: MessageEvent): void {
-    const message: GatewayPayload = unpack(data.data as unknown as Buffer);
+    const message: GatewayPayload = unpack(<Buffer>data.data);
     if (message.s !== null && this.sequence !== null) {
-      if ((message.s as number) > this.sequence) {
-        this.sequence = message.s as number;
+      if (<number>message.s > this.sequence) {
+        this.sequence = <number>message.s;
       }
     }
     if (message.t !== null) {

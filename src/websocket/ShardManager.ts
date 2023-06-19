@@ -1,4 +1,4 @@
-import { Routes } from "@fawkes.js/api-types";
+import { Routes } from "@fawkes.js/typings";
 import { BaseClass } from "../BaseClass";
 import { type Gateway } from "../Gateway";
 import { Shard } from "./Shard";
@@ -82,7 +82,7 @@ export class ShardManager extends BaseClass {
 
     while (this.shardQueue.remaining > 0 && this.shardQueue.queue.length > 0) {
       const shard = this.shardQueue.queue.shift();
-      this.shards.push(shard as Shard);
+      this.shards.push(<Shard>shard);
       this.shardQueue.remaining--;
 
       await shard?.connect();
