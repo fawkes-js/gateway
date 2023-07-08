@@ -61,7 +61,6 @@ export class MessageClient extends BaseClass {
   }
 
   publishPrimary(message: any): void {
-    // console.log(message);
     this.channel.sendToQueue("primary", Buffer.from(JSON.stringify(message)));
   }
 

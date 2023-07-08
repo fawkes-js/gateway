@@ -4,6 +4,7 @@ import { defaultGatewayOptions, defaultRESTOptions, mergeOptions } from "./utils
 import { ShardManager } from "./websocket/ShardManager";
 import { type RabbitOptions, type REDISOptions } from "@fawkes.js/typings";
 import { RedisClient } from "./messaging/RedisClient";
+import { EventEmitter } from "node:events";
 
 interface RESTGatewayOptions {
   api?: string;
@@ -24,7 +25,7 @@ export interface GatewayOptions {
   shards: number;
 }
 
-export class Gateway {
+export class Gateway extends EventEmitter {
   ws: ShardManager;
   token: string;
   options: any;
@@ -34,6 +35,7 @@ export class Gateway {
   messageClient: MessageClient;
 
   constructor(options: GatewayOptions) {
+    super();
     this.options = mergeOptions([
       defaultGatewayOptions,
       {
