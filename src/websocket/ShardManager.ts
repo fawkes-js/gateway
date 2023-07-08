@@ -1,4 +1,4 @@
-import { Routes } from "@fawkes.js/typings";
+import { Events, Routes } from "@fawkes.js/typings";
 import { BaseClass } from "../BaseClass";
 import { type Gateway } from "../Gateway";
 import { Shard } from "./Shard";
@@ -48,6 +48,15 @@ export class ShardManager extends BaseClass {
       .catch((err) => {
         console.log(err);
       });
+
+    console.log(data);
+
+    this.client.emit(
+      Events.Debug,
+      `[Gateway - Manager] => Received Gateway Information\n\tGateway URL: ${<string>data.url}\n\tRecommended Shards: ${<string>(
+        data.shards
+      )}`
+    );
 
     this.gateway = data.url;
     this.max_concurrency = data.session_start_limit.max_concurrency;
