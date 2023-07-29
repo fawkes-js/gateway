@@ -2,7 +2,7 @@ import { REST } from "@fawkes.js/rest";
 import { MessageClient } from "./messaging/MessageClient";
 import { defaultGatewayOptions, defaultRESTOptions, mergeOptions } from "./utils/Options";
 import { ShardManager } from "./websocket/ShardManager";
-import { type RabbitOptions, type REDISOptions } from "@fawkes.js/typings";
+import { Events, type RabbitOptions, type REDISOptions } from "@fawkes.js/typings";
 import { RedisClient } from "./messaging/RedisClient";
 import { EventEmitter } from "node:events";
 
@@ -81,6 +81,9 @@ export class Gateway extends EventEmitter {
   }
 
   login(): void {
+    // prettier-ignore
+    this.emit(Events.Debug, `[Gateway] => Login invoked, Token Provided: ${this.token.slice(0, 20)}**********************************`);
+
     void this.rest.initialise();
     void this.cache.connect();
     void this.messageClient.connect();

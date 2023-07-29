@@ -1,9 +1,9 @@
-import { BaseClass } from "../BaseClass";
 import { createClient, type RedisClientType } from "redis";
 import { type Gateway } from "../Gateway";
 import { type DiscordAPIGuild, type REDISOptions } from "@fawkes.js/typings";
+import { EventEmitter } from "node:events";
 
-export class RedisClient extends BaseClass {
+export class RedisClient extends EventEmitter {
   client: Gateway;
   options: REDISOptions;
   cache!: RedisClientType;
