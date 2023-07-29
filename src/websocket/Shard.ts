@@ -1,10 +1,11 @@
-import { GatewayCloseEventCodes, GatewayOpcodes } from "@fawkes.js/typings";
+import { Events, GatewayCloseEventCodes, GatewayOpcodes } from "@fawkes.js/typings";
 import { createWebSocket, pack, unpack } from "./Websocket";
 import { type WebSocket, type CloseEvent, type MessageEvent } from "ws";
 import { type Gateway } from "../Gateway";
-import { BaseClass } from "../BaseClass";
 import { type ShardManager } from "./ShardManager";
 import { FawkesError } from "../errors/FawkesError";
+import { EventEmitter } from "node:events";
+
 export interface GatewayPayload {
   op: number;
   d?: any;
@@ -25,7 +26,7 @@ interface RateLimitData {
   time: 60000;
 }
 
-export class Shard extends BaseClass {
+export class Shard extends EventEmitter {
   client: Gateway;
   ws!: WebSocket | null;
   sequence: null | number;
@@ -75,105 +76,50 @@ export class Shard extends BaseClass {
   onClose(event: CloseEvent): void {
     switch (event.code) {
       case GatewayCloseEventCodes.UnknownError:
-        this.debug({
-          title: "Gateway Close",
-          value: "Unknown Error Close Code",
-        });
         break;
 
       case GatewayCloseEventCodes.UnknownOpcode:
-        this.debug({
-          title: "Gateway Close",
-          value: "Unknown Opcode Close Code",
-        });
         this.resume();
         break;
 
       case GatewayCloseEventCodes.DecodeError:
-        this.debug({
-          title: "Gateway Close",
-          value: "Unknown Error Close Code",
-        });
         this.resume();
         break;
 
       case GatewayCloseEventCodes.NotAuthenticated:
         this.resume();
-        this.debug({
-          title: "Gateway Close",
-          value: "Not Authenticated Close Code",
-        });
+
         break;
 
       case GatewayCloseEventCodes.AuthenticationFailed:
-        this.debug({
-          title: "Gateway Close",
-          value: "Authentication Failed Close Code",
-        });
         throw new FawkesError("Authentication Failed", "An invalid token was provided.");
 
       case GatewayCloseEventCodes.AlreadyAuthenticated:
-        this.debug({
-          title: "Gateway Close",
-          value: "Already Authenticated Close Code",
-        });
         break;
 
       case GatewayCloseEventCodes.InvalidSequence:
-        this.debug({
-          title: "Gateway Close",
-          value: "Invalid Sequence Close Code",
-        });
         break;
 
       case GatewayCloseEventCodes.RateLimited:
-        this.debug({
-          title: "Gateway Close",
-          value: "Rate Limited Close Code",
-        });
         this.resume();
         break;
 
       case GatewayCloseEventCodes.SessionTimedOut:
-        this.debug({
-          title: "Gateway Close",
-          value: "Session Timed Out Close Code",
-        });
         break;
 
       case GatewayCloseEventCodes.InvalidShard:
-        this.debug({
-          title: "Gateway Close",
-          value: "Invalid Shard Close Code",
-        });
         break;
 
       case GatewayCloseEventCodes.ShardingRequired:
-        this.debug({
-          title: "Gateway Close",
-          value: "Sharding Required Close Code",
-        });
         break;
 
       case GatewayCloseEventCodes.InvalidAPIVersion:
-        this.debug({
-          title: "Gateway Close",
-          value: "Invalid API Version Close Code",
-        });
         break;
 
       case GatewayCloseEventCodes.InvalidIntents:
-        this.debug({
-          title: "Gateway Close",
-          value: "Invalid Intents Close Code",
-        });
         break;
 
       case GatewayCloseEventCodes.DisallowedIntents:
-        this.debug({
-          title: "Gateway Close",
-          value: "Disallowed Intents Close Code",
-        });
         break;
     }
   }
@@ -243,6 +189,10 @@ export class Shard extends BaseClass {
         this.sequence = <number>message.s;
       }
     }
+
+    // prettier-ignore
+    this.client.emit(Events.Debug, `[Gateway - Shard ${this.id}] => Message Received, \x1b[1mOpcode:\x1b[0m ${message.op} (${GatewayOpcodes[message.op]}), \x1b[1mEvent Name:\x1b[0m ${<string>message.t}, \x1b[1mSequence:\x1b[0m ${<number>message.s}`);
+
     if (message.t !== null) {
       if (message.t === "INTERACTION_CREATE" && (message.d.type === 3 || message.d.type === 4 || message.d.type === 5)) {
         void this.client.messageClient.publishSecondary(message);
@@ -253,45 +203,31 @@ export class Shard extends BaseClass {
 
     switch (message.t) {
       case "READY":
-        this.debug({ title: "Gateway", value: "Ready Event Received," });
-
         if (this.sessionId === null) this.sessionId = message.d.session_id;
         break;
     }
 
     switch (message.op) {
       case GatewayOpcodes.Dispatch:
-        this.debug({ title: "Gateway", value: "Dispatch Event Received," });
         break;
 
       case GatewayOpcodes.Heartbeat:
-        this.debug({ title: "Gateway", value: "Heartbeat Event Received," });
         break;
 
       case GatewayOpcodes.Reconnnect:
-        this.debug({ title: "Gateway", value: "Reconnect Event Received," });
         break;
 
       case GatewayOpcodes.InvalidSession:
-        this.debug({
-          title: "Gateway",
-          value: "Invalid Session Event Received,",
-        });
         this.resume(message.d);
         break;
 
       case GatewayOpcodes.Hello:
-        this.debug({ title: "Gateway", value: "Hello Event Received," });
         this.sendHeartbeat();
         this.startHeartbeats(message.d.heartbeat_interval);
         this.identify();
         break;
 
       case GatewayOpcodes.HeartbeatACK:
-        this.debug({
-          title: "Gateway",
-          value: `SHARD ${this.id} - Heartbeat Acknowledgement Event Received,`,
-        });
         this.acknowledgedHeartbeat();
         break;
     }
@@ -339,6 +275,8 @@ export class Shard extends BaseClass {
   }
 
   async connect(): Promise<void> {
+    this.client.emit(Events.Debug, `[Gateway - Shard ${this.id}] => Shard Connection Invoked, Shard ID: ${this.id}`);
+
     this.ws = createWebSocket(`${this.manager.gateway}`, {
       v: this.client.options.ws.version,
     });

@@ -1,8 +1,8 @@
-import { BaseClass } from "../BaseClass";
+import { EventEmitter } from "node:events";
 import type { Gateway } from "../Gateway";
 import { connect } from "amqplib/callback_api";
 
-export class MessageClient extends BaseClass {
+export class MessageClient extends EventEmitter {
   client: Gateway;
   connection: any;
   channel: any;
@@ -68,9 +68,10 @@ export class MessageClient extends BaseClass {
     if (message.d.type === 3) {
       const queue = await this.client.cache.get("event:message:" + String(message.d.message.id));
 
+      if (!queue) return;
       const data = {
-        tag: "event:message" + String(message.d.message.id),
-        data: message,
+        tag: "event:message:" + String(message.d.message.id),
+        data: message.d,
       };
       this.channel.sendToQueue(queue, Buffer.from(JSON.stringify(data)));
     }

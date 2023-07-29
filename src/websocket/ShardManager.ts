@@ -1,7 +1,7 @@
 import { Events, Routes } from "@fawkes.js/typings";
-import { BaseClass } from "../BaseClass";
 import { type Gateway } from "../Gateway";
 import { Shard } from "./Shard";
+import { EventEmitter } from "node:events";
 
 interface ShardQueue {
   queue: Shard[];
@@ -10,7 +10,7 @@ interface ShardQueue {
   remaining: number;
   total: number;
 }
-export class ShardManager extends BaseClass {
+export class ShardManager extends EventEmitter {
   client: Gateway;
   shards: Shard[];
   gateway!: string;
@@ -49,14 +49,8 @@ export class ShardManager extends BaseClass {
         console.log(err);
       });
 
-    console.log(data);
-
-    this.client.emit(
-      Events.Debug,
-      `[Gateway - Manager] => Received Gateway Information\n\tGateway URL: ${<string>data.url}\n\tRecommended Shards: ${<string>(
-        data.shards
-      )}`
-    );
+    // prettier-ignore
+    this.client.emit(Events.Debug,`[Gateway - Shard Manager] => Received Gateway Information\n\tGateway URL: ${<string>data.url}\n\tRecommended Shards: ${<string>(data.shards)}`);
 
     this.gateway = data.url;
     this.max_concurrency = data.session_start_limit.max_concurrency;
@@ -65,7 +59,11 @@ export class ShardManager extends BaseClass {
     if (this.client.totalShards === null || this.client.totalShards === undefined || typeof this.client.totalShards !== "number")
       this.client.totalShards = data.shards;
 
+    this.client.emit(Events.Debug, `[Gateway - Shard Manager] => Total Shards: ${this.client.totalShards}`);
+
     for (let id = 0; id < this.client.totalShards; id++) {
+      this.client.emit(Events.Debug, `[Gateway - Shard Manager] => Shard Created, Shard ID: ${id}`);
+
       const shard = new Shard(id, this, this.client);
       this.shardQueue.queue.push(shard);
       shard.on("ShardReconnect", () => {
@@ -91,10 +89,12 @@ export class ShardManager extends BaseClass {
 
     while (this.shardQueue.remaining > 0 && this.shardQueue.queue.length > 0) {
       const shard = this.shardQueue.queue.shift();
-      this.shards.push(<Shard>shard);
+      if (!shard) return;
+
+      this.shards.push(shard);
       this.shardQueue.remaining--;
 
-      await shard?.connect();
+      await shard.connect();
     }
   }
 }
