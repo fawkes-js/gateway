@@ -19,6 +19,7 @@ export function mergeOptions(options: object[]): any {
 
   options.forEach((option) => {
     if (!option) return;
+    if (Object.keys(option).length === 1 && Object.keys(option).includes("shards")) return;
     value = nested(value, option);
   });
 

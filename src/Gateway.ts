@@ -22,7 +22,7 @@ export interface GatewayOptions {
   rabbit: RabbitOptions;
   rest?: RESTGatewayOptions;
   ws?: WebsocketOptions;
-  shards: number;
+  shards: number | "auto" | { shards: number[]; totalShards: number };
 }
 
 export class Gateway extends EventEmitter {
@@ -30,7 +30,7 @@ export class Gateway extends EventEmitter {
   token: string;
   options: any;
   rest: REST;
-  totalShards: number;
+  sharding: "auto" | number | { shards: number[]; totalShards: number };
   cache: RedisClient;
   messageClient: MessageClient;
 
@@ -77,7 +77,7 @@ export class Gateway extends EventEmitter {
 
     this.cache = new RedisClient(this);
 
-    this.totalShards = options.shards;
+    this.sharding = options.shards;
   }
 
   login(): void {

@@ -73,6 +73,57 @@ export class Shard extends EventEmitter {
     };
   }
 
+  onMessage(data: MessageEvent): void {
+    const message: GatewayPayload = unpack(<Buffer>data.data);
+
+    if (message.s !== null && this.sequence !== null) {
+      if (<number>message.s > this.sequence) this.sequence = <number>message.s;
+    }
+
+    // prettier-ignore
+    this.client.emit(Events.Debug, `[Gateway - Shard ${this.id}] => Message Received, \x1b[1mOpcode:\x1b[0m ${message.op} (${GatewayOpcodes[message.op]}), \x1b[1mEvent Name:\x1b[0m ${<string>message.t}, \x1b[1mSequence:\x1b[0m ${<number>message.s}`);
+
+    switch (message.op) {
+      case GatewayOpcodes.Dispatch:
+        if (message.t === "READY") {
+          if (this.sessionId === null) this.sessionId = message.d.session_id;
+          this.client.messageClient.publishPrimary(message);
+        } else if (message.t === "INTERACTION_CREATE") {
+          if (message.d.type === 3 || message.d.type === 4 || message.d.type === 5) {
+            void this.client.messageClient.publishSecondary(message);
+          } else {
+            this.client.messageClient.publishPrimary(message);
+          }
+        } else {
+          this.client.messageClient.publishPrimary(message);
+        }
+        break;
+
+      case GatewayOpcodes.Heartbeat:
+        break;
+
+      case GatewayOpcodes.Reconnnect:
+        this.resume();
+        console.log(message);
+        break;
+
+      case GatewayOpcodes.InvalidSession:
+        this.resume(message.d);
+        console.log(message);
+        break;
+
+      case GatewayOpcodes.Hello:
+        this.sendHeartbeat();
+        this.startHeartbeats(message.d.heartbeat_interval);
+        this.identify();
+        break;
+
+      case GatewayOpcodes.HeartbeatACK:
+        this.acknowledgedHeartbeat();
+        break;
+    }
+  }
+
   onClose(event: CloseEvent): void {
     switch (event.code) {
       case GatewayCloseEventCodes.UnknownError:
@@ -108,19 +159,31 @@ export class Shard extends EventEmitter {
         break;
 
       case GatewayCloseEventCodes.InvalidShard:
-        break;
+        throw new FawkesError("Invalid Shard", "The shard provided was invalid.");
 
       case GatewayCloseEventCodes.ShardingRequired:
-        break;
+        throw new FawkesError(
+          "Sharding Required",
+          "This connection requires sharding, however this has not been enabled - ensure you have provided enough shards, or make use of the recommended shard count."
+        );
 
       case GatewayCloseEventCodes.InvalidAPIVersion:
-        break;
+        throw new FawkesError(
+          "Invalid API Version",
+          "The API version provided is invalid - consider using the latest version (version 10)."
+        );
 
       case GatewayCloseEventCodes.InvalidIntents:
-        break;
+        throw new FawkesError(
+          "Invalid Intents",
+          "The intents provided were invalid - ensure you are using the correct flags or values."
+        );
 
       case GatewayCloseEventCodes.DisallowedIntents:
-        break;
+        throw new FawkesError(
+          "Disallowed Intents",
+          "The intents provided were not allowed - check the discord developer portal to ensure that your provided intents are approved."
+        );
     }
   }
 
@@ -156,7 +219,7 @@ export class Shard extends EventEmitter {
   }
 
   resume(d?: any | null): void {
-    if (d.d === false) this.sessionId = "";
+    if (d) if (d.d === false) this.sessionId = "";
     this.emit("ShardReconnect", this);
   }
 
@@ -182,57 +245,6 @@ export class Shard extends EventEmitter {
     }, interval);
   }
 
-  onMessage(data: MessageEvent): void {
-    const message: GatewayPayload = unpack(<Buffer>data.data);
-    if (message.s !== null && this.sequence !== null) {
-      if (<number>message.s > this.sequence) {
-        this.sequence = <number>message.s;
-      }
-    }
-
-    // prettier-ignore
-    this.client.emit(Events.Debug, `[Gateway - Shard ${this.id}] => Message Received, \x1b[1mOpcode:\x1b[0m ${message.op} (${GatewayOpcodes[message.op]}), \x1b[1mEvent Name:\x1b[0m ${<string>message.t}, \x1b[1mSequence:\x1b[0m ${<number>message.s}`);
-
-    if (message.t !== null) {
-      if (message.t === "INTERACTION_CREATE" && (message.d.type === 3 || message.d.type === 4 || message.d.type === 5)) {
-        void this.client.messageClient.publishSecondary(message);
-      } else {
-        this.client.messageClient.publishPrimary(message);
-      }
-    }
-
-    switch (message.t) {
-      case "READY":
-        if (this.sessionId === null) this.sessionId = message.d.session_id;
-        break;
-    }
-
-    switch (message.op) {
-      case GatewayOpcodes.Dispatch:
-        break;
-
-      case GatewayOpcodes.Heartbeat:
-        break;
-
-      case GatewayOpcodes.Reconnnect:
-        break;
-
-      case GatewayOpcodes.InvalidSession:
-        this.resume(message.d);
-        break;
-
-      case GatewayOpcodes.Hello:
-        this.sendHeartbeat();
-        this.startHeartbeats(message.d.heartbeat_interval);
-        this.identify();
-        break;
-
-      case GatewayOpcodes.HeartbeatACK:
-        this.acknowledgedHeartbeat();
-        break;
-    }
-  }
-
   identify(): void {
     this.sessionId !== null ? this.identifyResume() : this.identifyNew();
   }
@@ -254,7 +266,7 @@ export class Shard extends EventEmitter {
             version: this.client.options.ws.version,
           },
           compression: false,
-          shard: [this.id, this.client.totalShards],
+          shard: [this.id, this.manager.totalShards],
         },
       },
     });
@@ -275,6 +287,7 @@ export class Shard extends EventEmitter {
   }
 
   async connect(): Promise<void> {
+    // console.log(`RATELIMIT KEY: ${this.id % 3}`);
     this.client.emit(Events.Debug, `[Gateway - Shard ${this.id}] => Shard Connection Invoked, Shard ID: ${this.id}`);
 
     this.ws = createWebSocket(`${this.manager.gateway}`, {
