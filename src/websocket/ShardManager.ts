@@ -7,7 +7,7 @@ import { EventEmitter } from "node:events";
 interface ShardQueue {
   queue: Shard[];
   timer: any;
-  time: 8000;
+  time: 5000;
   total: number | null;
 }
 export class ShardManager extends EventEmitter {
@@ -30,7 +30,7 @@ export class ShardManager extends EventEmitter {
     this.shardQueue = {
       queue: [],
       timer: null,
-      time: 8000,
+      time: 5000,
       total: null,
     };
   }
@@ -109,7 +109,7 @@ export class ShardManager extends EventEmitter {
       const remaining = await this.client.cache.cache.get("gateway:maxConcurrencyRemaining");
 
       if (remaining === null) {
-        multi.set("gateway:maxConcurrencyRemaining", <number>this.shardQueue.total - 1, { EX: 8 });
+        multi.set("gateway:maxConcurrencyRemaining", <number>this.shardQueue.total - 1, { EX: 5 });
         // PROCEED AND CREATE THE SHARD
       } else if (Number(remaining) <= 0) {
         // SET A TIMEOUT USING THE KEY'S EXPIRY, AND THEN TRY AGAIN WHEN TIMEOUT DONE
@@ -123,7 +123,7 @@ export class ShardManager extends EventEmitter {
           return;
         }
       } else if (Number(remaining) > 0) {
-        multi.set("gateway:maxConcurrencyRemaining", <number>this.shardQueue.total - 1, { EX: 8 });
+        multi.set("gateway:maxConcurrencyRemaining", <number>this.shardQueue.total - 1, { EX: 5 });
         // PROCEED AND CREATE THE SHARD
       }
 
