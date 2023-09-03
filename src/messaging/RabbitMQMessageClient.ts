@@ -2,7 +2,7 @@ import { EventEmitter } from "node:events";
 import type { Gateway } from "../Gateway";
 import { connect } from "amqplib/callback_api";
 
-export class MessageClient extends EventEmitter {
+export class RabbitMQMessageClient extends EventEmitter {
   client: Gateway;
   connection: any;
   channel: any;

@@ -19,6 +19,7 @@
       {
         "assertionStyle": "angle-bracket"
       }
-    ]
+    ],
+    "@typescript-eslint/no-misused-promises": "off"
   }
 }
