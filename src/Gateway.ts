@@ -2,10 +2,9 @@ import { REST } from "@fawkes.js/rest";
 import { MessageClient } from "./messaging/MessageClient";
 import { defaultGatewayOptions, defaultRESTOptions, mergeOptions } from "./utils/Options";
 import { ShardManager } from "./websocket/ShardManager";
-import { Events, type RabbitOptions, type REDISOptions } from "@fawkes.js/typings";
-import { RedisClient } from "./messaging/RedisClient";
+import { Events, type RabbitOptions } from "@fawkes.js/typings";
 import { EventEmitter } from "node:events";
-
+import { type REDISOptions, RedisClient, LocalClient } from "@fawkes.js/cache";
 interface RESTGatewayOptions {
   api?: string;
   version?: string;
@@ -31,7 +30,7 @@ export class Gateway extends EventEmitter {
   options: any;
   rest: REST;
   sharding: "auto" | number | { shards: number[]; totalShards: number };
-  cache: RedisClient;
+  cache: RedisClient | LocalClient;
   messageClient: MessageClient;
 
   constructor(options: GatewayOptions) {
@@ -57,14 +56,6 @@ export class Gateway extends EventEmitter {
 
     this.token = options.token;
 
-    this.rest = new REST(
-      mergeOptions([
-        defaultRESTOptions,
-        { redis: options.redis },
-        options.rest != null ? options.rest : {},
-        { discord: { token: options.token } },
-      ])
-    );
     // mergeOptions([
     //   this.options.rest,
     //   { redis: this.options.redis },
@@ -75,7 +66,17 @@ export class Gateway extends EventEmitter {
 
     this.messageClient = new MessageClient(this);
 
-    this.cache = new RedisClient(this);
+    this.cache = options.redis ? new RedisClient(options.redis) : new LocalClient();
+
+    this.rest = new REST(
+      mergeOptions([
+        defaultRESTOptions,
+        { redis: options.redis },
+        options.rest != null ? options.rest : {},
+        { discord: { token: options.token } },
+      ]),
+      this.cache
+    );
 
     this.sharding = options.shards;
   }
@@ -84,8 +85,7 @@ export class Gateway extends EventEmitter {
     // prettier-ignore
     this.emit(Events.Debug, `[Gateway] => Login invoked, Token Provided: ${this.token.slice(0, 20)}**********************************`);
 
-    void this.rest.initialise();
-    void this.cache.connect();
+    void this.cache.init();
     void this.messageClient.connect();
     void this.ws.connect();
   }

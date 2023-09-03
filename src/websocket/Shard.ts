@@ -287,7 +287,6 @@ export class Shard extends EventEmitter {
   }
 
   async connect(): Promise<void> {
-    // console.log(`RATELIMIT KEY: ${this.id % 3}`);
     this.client.emit(Events.Debug, `[Gateway - Shard ${this.id}] => Shard Connection Invoked, Shard ID: ${this.id}`);
 
     this.ws = createWebSocket(`${this.manager.gateway}`, {

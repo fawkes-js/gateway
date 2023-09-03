@@ -20,6 +20,7 @@
     "typescript": "^5.0.3"
   },
   "dependencies": {
+    "@fawkes.js/cache": "^1.0.0",
     "@fawkes.js/rest": "^6.0.0",
     "@fawkes.js/typings": "^6.0.0",
     "amqplib": "^0.10.3",
