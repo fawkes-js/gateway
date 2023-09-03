@@ -138,7 +138,7 @@ export class ShardManager extends EventEmitter {
         const remaining = await this.client.cache.get("gateway:maxConcurrencyRemaining");
 
         if (remaining === null || Number(remaining) > 0)
-          this.client.cache.set("gateway:maxConcurrencyRemaining", <number>this.shardQueue.total - 1, { EX: 5 });
+          await this.client.cache.set("gateway:maxConcurrencyRemaining", <number>this.shardQueue.total - 1, { EX: 5 });
         else if (Number(remaining) <= 0) {
           if (this.shardQueue.timer) return;
           else {

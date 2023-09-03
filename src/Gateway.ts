@@ -1,10 +1,11 @@
 import { REST } from "@fawkes.js/rest";
-import { MessageClient } from "./messaging/MessageClient";
+import { RabbitMQMessageClient } from "./messaging/RabbitMQMessageClient";
 import { defaultGatewayOptions, defaultRESTOptions, mergeOptions } from "./utils/Options";
 import { ShardManager } from "./websocket/ShardManager";
 import { Events, type RabbitOptions } from "@fawkes.js/typings";
 import { EventEmitter } from "node:events";
 import { type REDISOptions, RedisClient, LocalClient } from "@fawkes.js/cache";
+import { LocalMessageClient } from "./messaging/LocalMessageClient";
 interface RESTGatewayOptions {
   api?: string;
   version?: string;
@@ -17,11 +18,11 @@ interface WebsocketOptions {
 export interface GatewayOptions {
   intents: any[];
   token: string;
-  redis: REDISOptions;
-  rabbit: RabbitOptions;
+  redis?: REDISOptions;
+  rabbit?: RabbitOptions;
   rest?: RESTGatewayOptions;
   ws?: WebsocketOptions;
-  shards: number | "auto" | { shards: number[]; totalShards: number };
+  shards?: number | "auto" | { shards: number[]; totalShards: number };
 }
 
 export class Gateway extends EventEmitter {
@@ -31,7 +32,7 @@ export class Gateway extends EventEmitter {
   rest: REST;
   sharding: "auto" | number | { shards: number[]; totalShards: number };
   cache: RedisClient | LocalClient;
-  messageClient: MessageClient;
+  messageClient: RabbitMQMessageClient | LocalMessageClient;
 
   constructor(options: GatewayOptions) {
     super();
@@ -64,7 +65,7 @@ export class Gateway extends EventEmitter {
 
     this.ws = new ShardManager(this);
 
-    this.messageClient = new MessageClient(this);
+    this.messageClient = this.options.rabbit ? new RabbitMQMessageClient(this) : new LocalMessageClient(this);
 
     this.cache = options.redis ? new RedisClient(options.redis) : new LocalClient();
 
@@ -78,7 +79,7 @@ export class Gateway extends EventEmitter {
       this.cache
     );
 
-    this.sharding = options.shards;
+    this.sharding = options.shards ?? "auto";
   }
 
   login(): void {
