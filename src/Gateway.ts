@@ -82,12 +82,12 @@ export class Gateway extends EventEmitter {
     this.sharding = options.shards ?? "auto";
   }
 
-  login(): void {
+  async login(): Promise<void> {
     // prettier-ignore
     this.emit(Events.Debug, `[Gateway] => Login invoked, Token Provided: ${this.token.slice(0, 20)}**********************************`);
 
-    void this.cache.init();
-    void this.messageClient.connect();
-    void this.ws.connect();
+    await this.cache.init();
+    await this.messageClient.connect();
+    await this.ws.connect();
   }
 }

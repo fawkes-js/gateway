@@ -61,6 +61,7 @@ export class RabbitMQMessageClient extends EventEmitter {
   }
 
   publishPrimary(message: any): void {
+    if (!this.channel) console.log("NO CHANNEL, BUT WE SHOULD BE WAITING!");
     this.channel.sendToQueue("primary", Buffer.from(JSON.stringify(message)));
   }
 
