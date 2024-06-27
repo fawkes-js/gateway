@@ -2,7 +2,7 @@
   "devDependencies": {
     "@types/amqplib": "^0.10.1",
     "@types/axios": "^0.14.0",
-    "@types/node": "^18.15.11",
+    "@types/node": "^18.19.39",
     "@types/redis": "^4.0.11",
     "@types/ws": "^8.5.3",
     "@typescript-eslint/eslint-plugin": "^5.57.0",
@@ -20,24 +20,24 @@
     "typescript": "^5.0.3"
   },
   "dependencies": {
-    "@fawkes.js/cache": "^10.0.2",
-    "@fawkes.js/rest": "^10.0.2",
-    "@fawkes.js/typings": "^10.0.2",
+    "@fawkes.js/cache": "^1.0.10",
+    "@fawkes.js/rest": "^1.0.8",
+    "@fawkes.js/typings": "^1.0.8",
     "amqplib": "^0.10.3",
     "axios": "^1.2.1",
     "dotenv": "^16.0.3",
-    "erlpack": "^0.1.4",
     "redis": "^4.5.1",
     "ws": "^8.11.0"
   },
   "name": "@fawkes.js/gateway",
-  "version": "10.0.4",
+  "version": "1.0.11",
   "main": "./dist/esm/index.js",
   "module": "./dist/index.mjs",
-  "types": "dist/types/index.d.ts",
+  "types": "./dist/types/index.d.ts",
   "exports": {
     "import": "./dist/esm/index.js",
-    "require": "./dist/cjs/index.js"
+    "require": "./dist/cjs/index.js",
+    "types": "./dist/types/index.d.ts"
   },
   "scripts": {
     "start": "node dist/cjs/index.js",
