@@ -74,14 +74,13 @@ export class Shard extends EventEmitter {
   }
 
   onMessage(data: MessageEvent): void {
-    const message: GatewayPayload = unpack(<Buffer>data.data);
-
+    const message: GatewayPayload = unpack(<string>data.data);
     if (message.s !== null && this.sequence !== null) {
       if (<number>message.s > this.sequence) this.sequence = <number>message.s;
     }
 
     // prettier-ignore
-    this.client.emit(Events.Debug, `[Gateway - Shard ${this.id}] => Message Received, \x1b[1mOpcode:\x1b[0m ${message.op} (${GatewayOpcodes[message.op]}), \x1b[1mEvent Name:\x1b[0m ${<string>message.t}, \x1b[1mSequence:\x1b[0m ${<number>message.s}`);
+    this.client.emit(Events.Debug, `[Gateway - Shard ${this.id}] => Message Received, \x1b[1mOpcode:\x1b[0m ${message.op} (${GatewayOpcodes[message.op]}), \x1b[1mEvent Name:\x1b[0m ${<string>message.t}, \x1b[1mSequence:\x1b[0m ${<number>message.s}`,Date.now());
 
     switch (message.op) {
       case GatewayOpcodes.Dispatch:

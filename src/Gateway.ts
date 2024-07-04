@@ -57,12 +57,6 @@ export class Gateway extends EventEmitter {
 
     this.token = options.token;
 
-    // mergeOptions([
-    //   this.options.rest,
-    //   { redis: this.options.redis },
-    //   { token: this.options.token },
-    // ]) as RESTOptions
-
     this.ws = new ShardManager(this);
 
     this.messageClient = this.options.rabbit ? new RabbitMQMessageClient(this) : new LocalMessageClient(this);
